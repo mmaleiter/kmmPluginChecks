@@ -6,21 +6,25 @@ import android.content.Intent
 import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
+import android.util.Log
 import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.check.kmm.pluginchecks.android.databinding.ActivityStartBinding
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 class StartActivity : AppCompatActivity() {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityStartBinding
 
-    private lateinit var mService: BluetoothLeService
+    private lateinit var bluetoothService: BluetoothLeService
     private var mBound: Boolean = false
 
     private val connection = object : ServiceConnection {
@@ -28,8 +32,13 @@ class StartActivity : AppCompatActivity() {
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance.
             val binder = service as BluetoothLeService.LocalBinder
-            mService = binder.getService()
+            bluetoothService = binder.getService()
             mBound = true
+            lifecycleScope.launch {
+                bluetoothService.scanStatus.collect{
+                    Log.e("ScanStatus", it.toString())
+                }
+            }
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -69,7 +78,23 @@ class StartActivity : AppCompatActivity() {
                 .setAnchorView(R.id.fab)
                 .setAction("Action", null).show()
         }
+        setupButtons()
 
+
+
+    }
+
+    private fun setupButtons() {
+        with(binding.content){
+            startScan.setOnClickListener {
+                bluetoothService.startScan()
+            }
+            stopScan.setOnClickListener {
+                bluetoothService.startScan()
+            }
+            connect.setOnClickListener {  }
+            disconnect.setOnClickListener {  }
+        }
     }
 
     override fun onSupportNavigateUp(): Boolean {

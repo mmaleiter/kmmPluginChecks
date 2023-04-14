@@ -100,17 +100,14 @@ class BluetoothLeService : LifecycleService() {
                                     )
                             }
                             .collect { advertisement ->
-                                // TODO keep track of time each device was last seen, then
-                                //  occasionally prune ones we haven't seen in a while.
                                 _foundDevices[advertisement.address] =
                                     AdvertisementWrapper(advertisement)
                                 _advertisements.value = _foundDevices.values.toList()
-                                Log.i("APP", advertisement.toString())
+                                Log.e("APP", advertisement.toString())
                             }
                     }
                 }.invokeOnCompletion {
-                    // TODO why does scan fragment react so slowly to this and not hide the spinner?
-                    Log.i("APP", "SCAN IS STOPPING")
+                    Log.e("APP", "SCAN IS STOPPING")
                     _scanStatus.value = ScanStatus.Idle
                 }
             }
