@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import com.check.kmm.pluginchecks.android.R
 import com.check.kmm.pluginchecks.android.databinding.FragmentFirstBinding
 
 /**

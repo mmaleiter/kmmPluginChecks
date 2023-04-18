@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.data
 
 
 import com.juul.kable.DiscoveredService
@@ -16,6 +16,5 @@ class Device(
 
         _discoveredServices.emit(peripheral.services!!)
 
-        // Application-specific code here
     }
 }

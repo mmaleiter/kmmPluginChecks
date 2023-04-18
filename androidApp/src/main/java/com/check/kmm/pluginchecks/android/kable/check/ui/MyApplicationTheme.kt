@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.ui
 
 
 //

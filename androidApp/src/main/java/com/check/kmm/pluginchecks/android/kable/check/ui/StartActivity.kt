@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.ui
 
 import android.content.ComponentName
 import android.content.Context
@@ -7,7 +7,6 @@ import android.content.ServiceConnection
 import android.os.Bundle
 import android.os.IBinder
 import android.util.Log
-import com.google.android.material.snackbar.Snackbar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
@@ -15,8 +14,10 @@ import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
+import com.check.kmm.pluginchecks.android.R
 import com.check.kmm.pluginchecks.android.databinding.ActivityStartBinding
-import kotlinx.coroutines.flow.collect
+import com.check.kmm.pluginchecks.android.kable.check.BluetoothLeService
+import com.google.android.material.snackbar.Snackbar
 import kotlinx.coroutines.launch
 
 class StartActivity : AppCompatActivity() {
@@ -48,7 +49,7 @@ class StartActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Intent(this,BluetoothLeService::class.java).also {
+        Intent(this, BluetoothLeService::class.java).also {
             intent ->
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
@@ -80,8 +81,6 @@ class StartActivity : AppCompatActivity() {
         }
         setupButtons()
 
-
-
     }
 
     private fun setupButtons() {
@@ -90,7 +89,7 @@ class StartActivity : AppCompatActivity() {
                 bluetoothService.startScan()
             }
             stopScan.setOnClickListener {
-                bluetoothService.startScan()
+                bluetoothService.stopScan()
             }
             connect.setOnClickListener {  }
             disconnect.setOnClickListener {  }

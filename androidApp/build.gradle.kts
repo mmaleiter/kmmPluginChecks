@@ -57,7 +57,7 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.42")
     implementation("com.google.dagger:hilt-android:2.42")
 
-    implementation("com.juul.kable:core:0.22.0")
+    implementation("com.juul.kable:core:3001")
 
     implementation("com.google.android.material:material:1.5.0-alpha04")
     implementation("androidx.appcompat:appcompat:1.6.1")

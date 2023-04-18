@@ -7,7 +7,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".StartActivity"
+            android:name=".kable.check.ui.StartActivity"
             android:exported="true"
             android:label="@string/title_activity_start"
             android:theme="@style/AppTheme">
@@ -19,7 +19,7 @@
 
         </activity>
         <service
-            android:name=".BluetoothLeService"
+            android:name=".kable.check.BluetoothLeService"
             android:enabled="true"
             android:exported="false" />
     </application>

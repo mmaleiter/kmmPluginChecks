@@ -20,7 +20,7 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 api("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
-                implementation("com.juul.kable:core:0.22.0")
+                implementation("com.juul.kable:core:3001")
             }
 
         }

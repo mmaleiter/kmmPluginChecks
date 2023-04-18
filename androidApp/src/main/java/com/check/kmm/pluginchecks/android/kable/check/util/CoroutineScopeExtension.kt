@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.util
 
 
 import kotlinx.coroutines.CancellationException
@@ -11,5 +11,5 @@ fun CoroutineScope.childScope() =
     CoroutineScope(coroutineContext + Job(coroutineContext[Job]))
 
 fun CoroutineScope.cancelChildren(
-    cause: CancellationException? = null
+    cause: CancellationException? = CancellationException()
 ) = coroutineContext[Job]?.cancelChildren(cause)

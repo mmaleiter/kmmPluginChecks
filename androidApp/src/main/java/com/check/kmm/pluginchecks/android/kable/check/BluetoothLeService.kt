@@ -1,5 +1,4 @@
-package com.check.kmm.pluginchecks.android
-
+package com.check.kmm.pluginchecks.android.kable.check
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
@@ -8,7 +7,12 @@ import android.os.IBinder
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
+import com.check.kmm.pluginchecks.android.AdvertisementWrapper
+import com.check.kmm.pluginchecks.android.kable.check.data.Device
+import com.check.kmm.pluginchecks.android.kable.check.util.cancelChildren
+import com.check.kmm.pluginchecks.android.kable.check.util.childScope
 import com.juul.kable.Advertisement
+import com.juul.kable.Bluetooth
 import com.juul.kable.DiscoveredService
 import com.juul.kable.Scanner
 import com.juul.kable.peripheral
@@ -53,7 +57,6 @@ sealed class ConnectState {
 
 private val SCAN_DURATION_MILLIS = TimeUnit.SECONDS.toMillis(15)
 
-
 class BluetoothLeService : LifecycleService() {
     private val _job = SupervisorJob()
     private val _scope = CoroutineScope(Dispatchers.IO + _job)
@@ -61,6 +64,7 @@ class BluetoothLeService : LifecycleService() {
     private val _connectScope = _scope.childScope()
 
     private val _scanner = Scanner()
+    private val _blueKable = Bluetooth
 
     private val _foundDevices = hashMapOf<String, AdvertisementWrapper>()
 
@@ -71,15 +75,22 @@ class BluetoothLeService : LifecycleService() {
         MutableStateFlow<List<AdvertisementWrapper>>(emptyList())
     val advertisements = _advertisements.asStateFlow()
 
-    private val _isBluetoothEnabled: Boolean
-        get() = BluetoothAdapter.getDefaultAdapter().isEnabled
+    private fun isBluetoothEnabled(): Boolean {
+        return BluetoothAdapter.getDefaultAdapter().isEnabled
+    }
+
+    private val _bluetoothEnabledJob: Job = _scope.launch {
+        _blueKable.availability.collect {
+            Log.e("BluetoothAvailable", "Available: $it")
+        }
+    }
 
     fun startScan() {
         disconnect()
 
         when {
             _scanStatus.value == ScanStatus.Running -> return
-            !_isBluetoothEnabled -> _scanStatus.value =
+            !isBluetoothEnabled() -> _scanStatus.value =
                 ScanStatus.Failed(ScanFailure.BluetoothNotEnabled)
             //TODO
 //            !hasLocationAndConnectPermissions -> _scanStatus.value =
@@ -171,6 +182,7 @@ class BluetoothLeService : LifecycleService() {
     override fun onDestroy() {
         super.onDestroy()
         _job.cancel()
+        _bluetoothEnabledJob.cancel()
     }
 
 }

@@ -1,7 +1,8 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.check.kmm.pluginchecks.android.AdvertisementWrapper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -10,7 +11,6 @@ import javax.inject.Inject
 //@HiltViewModel
 //class BleViewModel
 //@Inject constructor(
-//    private val bluetoothLeServiceWrapper: BluetoothLeServiceWrapper
 //): ViewModel() {
 //    val advertisements = bluetoothLeServiceWrapper.advertisements
 //
