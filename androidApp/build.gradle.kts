@@ -15,6 +15,10 @@ android {
         versionCode = 1
         versionName = "1.0"
     }
+    testOptions {
+        animationsDisabled = true
+    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -22,6 +26,17 @@ android {
     packagingOptions {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/license.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/notice.txt"
+            excludes += "META-INF/ASL2.0"
+            excludes += "META-INF/LGPL2.1"
+            excludes += "META-INF/AL2.0"
+            excludes += "META-INF/*.kotlin_module"
         }
     }
     buildTypes {
@@ -42,6 +57,7 @@ dependencies {
 
     implementation(project(":shared"))
 
+    implementation( "com.jakewharton.timber:timber:5.0.1" )
 
     api("androidx.lifecycle:lifecycle-service:2.6.1")
 
@@ -64,6 +80,13 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.navigation:navigation-fragment-ktx:2.5.3")
     implementation("androidx.navigation:navigation-ui-ktx:2.5.3")
+
+
+    androidTestImplementation ("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation ("androidx.test:rules:1.5.0")
+    androidTestImplementation ("io.mockk:mockk-android:1.11.0")
+    androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
+    androidTestImplementation ("io.insert-koin:koin-test-junit4:3.3.2")
 
 //    compileOnly(project(path = ":annotations"))
 //    kapt(project(":processor"))

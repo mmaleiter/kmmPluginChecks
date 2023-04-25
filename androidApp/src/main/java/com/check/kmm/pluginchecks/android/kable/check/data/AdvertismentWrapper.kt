@@ -1,8 +1,7 @@
-package com.check.kmm.pluginchecks.android
+package com.check.kmm.pluginchecks.android.kable.check.data
 
 import com.juul.kable.Advertisement
 
-/// Thin wrapper around the `Advertisement` to avoid exposing it as part of our API
 data class AdvertisementWrapper constructor(internal val adv: Advertisement) {
     val name: String? = adv.name
     val rssi = adv.rssi

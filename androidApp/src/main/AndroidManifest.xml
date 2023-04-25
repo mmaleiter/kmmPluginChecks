@@ -6,6 +6,10 @@
         android:allowBackup="false"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+
+
+
         <activity
             android:name=".kable.check.ui.StartActivity"
             android:exported="true"
@@ -19,7 +23,7 @@
 
         </activity>
         <service
-            android:name=".kable.check.BluetoothLeService"
+            android:name=".kable.check.service.BluetoothLeService"
             android:enabled="true"
             android:exported="false" />
     </application>

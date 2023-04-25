@@ -47,7 +47,6 @@
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 
-
     <FrameLayout
         android:id="@+id/blockingProgress"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -78,4 +77,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

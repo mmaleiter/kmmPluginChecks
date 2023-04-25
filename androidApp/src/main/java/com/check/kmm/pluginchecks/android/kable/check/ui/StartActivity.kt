@@ -4,9 +4,9 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
+import android.location.LocationManager
 import android.os.Bundle
 import android.os.IBinder
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
@@ -16,9 +16,14 @@ import androidx.navigation.ui.navigateUp
 import androidx.navigation.ui.setupActionBarWithNavController
 import com.check.kmm.pluginchecks.android.R
 import com.check.kmm.pluginchecks.android.databinding.ActivityStartBinding
-import com.check.kmm.pluginchecks.android.kable.check.BluetoothLeService
+import com.check.kmm.pluginchecks.android.kable.check.service.BluetoothLeService
+import com.check.kmm.pluginchecks.android.kable.check.service.ScanStatus
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 class StartActivity : AppCompatActivity() {
 
@@ -28,6 +33,9 @@ class StartActivity : AppCompatActivity() {
     private lateinit var bluetoothService: BluetoothLeService
     private var mBound: Boolean = false
 
+    private val _testSubjectFlow = MutableStateFlow(TestDataContainer())
+    val testSubjectFlow: StateFlow<TestDataContainer> = _testSubjectFlow
+
     private val connection = object : ServiceConnection {
 
         override fun onServiceConnected(className: ComponentName, service: IBinder) {
@@ -36,8 +44,17 @@ class StartActivity : AppCompatActivity() {
             bluetoothService = binder.getService()
             mBound = true
             lifecycleScope.launch {
-                bluetoothService.scanStatus.collect{
-                    Log.e("ScanStatus", it.toString())
+                bluetoothService.scanStatus.map {
+                    if(_testSubjectFlow.tryEmit(testSubjectFlow.value.copy(
+                            scanStatus = it)
+                        )){
+                        Timber.v("As expected! :-)")
+                    } else {
+                        Timber.e("Suspicious")
+                    }
+                    it
+                }.collect {
+                    Timber.v(it.toString())
                 }
             }
         }
@@ -49,13 +66,15 @@ class StartActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        Intent(this, BluetoothLeService::class.java).also {
-            intent ->
+        Intent(this, BluetoothLeService::class.java).also { intent ->
             bindService(intent, connection, Context.BIND_AUTO_CREATE)
         }
     }
 
+    val lm = getSystemService(LOCATION_SERVICE) as LocationManager
+
     override fun onStop() {
+//        lm.
         super.onStop()
         unbindService(connection)
         mBound = false
@@ -80,19 +99,18 @@ class StartActivity : AppCompatActivity() {
                 .setAction("Action", null).show()
         }
         setupButtons()
-
     }
 
     private fun setupButtons() {
-        with(binding.content){
+        with(binding.content) {
             startScan.setOnClickListener {
                 bluetoothService.startScan()
             }
             stopScan.setOnClickListener {
                 bluetoothService.stopScan()
             }
-            connect.setOnClickListener {  }
-            disconnect.setOnClickListener {  }
+            connect.setOnClickListener { }
+            disconnect.setOnClickListener { }
         }
     }
 
@@ -101,4 +119,13 @@ class StartActivity : AppCompatActivity() {
         return navController.navigateUp(appBarConfiguration)
             || super.onSupportNavigateUp()
     }
+
 }
+
+data class TestDataContainer(
+
+    val testStarted: Boolean = false,
+    val createdTimeStamp: Long = System.currentTimeMillis(),
+    val scanStatus: ScanStatus = ScanStatus.Idle
+
+    )

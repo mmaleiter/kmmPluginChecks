@@ -1,4 +1,4 @@
-package com.check.kmm.pluginchecks.android.kable.check
+package com.check.kmm.pluginchecks.android.kable.check.service
 
 import android.bluetooth.BluetoothAdapter
 import android.content.Intent
@@ -7,8 +7,9 @@ import android.os.IBinder
 import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
-import com.check.kmm.pluginchecks.android.AdvertisementWrapper
+import com.check.kmm.pluginchecks.android.kable.check.data.AdvertisementWrapper
 import com.check.kmm.pluginchecks.android.kable.check.data.Device
+import com.check.kmm.pluginchecks.android.kable.check.ui.TestDataContainer
 import com.check.kmm.pluginchecks.android.kable.check.util.cancelChildren
 import com.check.kmm.pluginchecks.android.kable.check.util.childScope
 import com.juul.kable.Advertisement
@@ -19,44 +20,12 @@ import com.juul.kable.peripheral
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import java.lang.IllegalStateException
 import java.util.concurrent.TimeUnit
-
-sealed class ScanFailure {
-    object BluetoothNotEnabled : ScanFailure()
-    object PermissionsMissing : ScanFailure()
-    data class OtherFailure(val message: CharSequence) : ScanFailure()
-}
-
-sealed class ScanStatus {
-    object Idle : ScanStatus()
-    object Running : ScanStatus()
-    data class Failed(val failure: ScanFailure) : ScanStatus()
-
-    override fun toString(): String {
-        return when (this) {
-            is Idle -> "Idle"
-            is Running -> "Running"
-            else -> "Failed"
-        }
-    }
-}
-
-sealed class ConnectState {
-    object Idle : ConnectState()
-    object PeripheralConnecting : ConnectState()
-    object PeripheralConnected : ConnectState()
-
-    override fun toString(): String {
-        return when (this) {
-            is Idle -> "Idle"
-            is PeripheralConnecting -> "Connecting"
-            is PeripheralConnected -> "Connected"
-        }
-    }
-}
 
 private val SCAN_DURATION_MILLIS = TimeUnit.SECONDS.toMillis(15)
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class BluetoothLeService : LifecycleService() {
     private val _job = SupervisorJob()
     private val _scope = CoroutineScope(Dispatchers.IO + _job)
@@ -75,8 +44,23 @@ class BluetoothLeService : LifecycleService() {
         MutableStateFlow<List<AdvertisementWrapper>>(emptyList())
     val advertisements = _advertisements.asStateFlow()
 
+
+
     private fun isBluetoothEnabled(): Boolean {
         return BluetoothAdapter.getDefaultAdapter().isEnabled
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        intent?.let { intent ->
+            actOnIntent(intent)
+        }
+        return super.onStartCommand(intent, flags, startId)
+    }
+
+    private fun actOnIntent(intent: Intent) {
+//        when (intent.action) {
+//            null -> throw IllegalStateException("actOnIntent(intent: Intent)")
+//        }
     }
 
     private val _bluetoothEnabledJob: Job = _scope.launch {
@@ -90,6 +74,7 @@ class BluetoothLeService : LifecycleService() {
 
         when {
             _scanStatus.value == ScanStatus.Running -> return
+
             !isBluetoothEnabled() -> _scanStatus.value =
                 ScanStatus.Failed(ScanFailure.BluetoothNotEnabled)
             //TODO
@@ -140,10 +125,10 @@ class BluetoothLeService : LifecycleService() {
     }.stateIn(scope = lifecycleScope, initialValue = listOf(), started = SharingStarted.WhileSubscribed(5000))
 
     fun disconnect() {
-        //connectScope.cancelChildren()
+        _connectScope.cancelChildren()
         _connectState.value = ConnectState.Idle
 
-        // TODO: is it wrong to use runBlocking?
+        // TODO:
         runBlocking {
             _activeDevice.value?.disconnect()
             _activeDevice.value = null
@@ -185,4 +170,9 @@ class BluetoothLeService : LifecycleService() {
         _bluetoothEnabledJob.cancel()
     }
 
+    companion object {
+
+    }
+
 }
+
