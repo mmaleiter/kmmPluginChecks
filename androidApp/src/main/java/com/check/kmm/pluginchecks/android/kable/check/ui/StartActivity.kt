@@ -1,5 +1,7 @@
 package com.check.kmm.pluginchecks.android.kable.check.ui
 
+import android.annotation.SuppressLint
+import android.bluetooth.BluetoothAdapter
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -7,6 +9,8 @@ import android.content.ServiceConnection
 import android.location.LocationManager
 import android.os.Bundle
 import android.os.IBinder
+import android.view.View
+import androidx.annotation.IdRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
@@ -24,14 +28,26 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.text.FieldPosition
 
 class StartActivity : AppCompatActivity() {
 
+    private lateinit var activityResultHandler: ActivityResultHandler
+
     private lateinit var appBarConfiguration: AppBarConfiguration
+
     private lateinit var binding: ActivityStartBinding
 
     private lateinit var bluetoothService: BluetoothLeService
     private var mBound: Boolean = false
+
+    var testedException: Throwable = NotThrownException()
+
+    private var currentTestDataContainer: TestDataContainer = TestDataContainer()
+        set(value) {
+            _testSubjectFlow.value = value
+            field = value
+        }
 
     private val _testSubjectFlow = MutableStateFlow(TestDataContainer())
     val testSubjectFlow: StateFlow<TestDataContainer> = _testSubjectFlow
@@ -45,15 +61,16 @@ class StartActivity : AppCompatActivity() {
             mBound = true
             lifecycleScope.launch {
                 bluetoothService.scanStatus.map {
-                    if(_testSubjectFlow.tryEmit(testSubjectFlow.value.copy(
+                    if (_testSubjectFlow.tryEmit(testSubjectFlow.value.copy(
                             scanStatus = it)
-                        )){
+                        )) {
                         Timber.v("As expected! :-)")
                     } else {
                         Timber.e("Suspicious")
                     }
                     it
                 }.collect {
+
                     Timber.v(it.toString())
                 }
             }
@@ -71,10 +88,7 @@ class StartActivity : AppCompatActivity() {
         }
     }
 
-    val lm = getSystemService(LOCATION_SERVICE) as LocationManager
-
     override fun onStop() {
-//        lm.
         super.onStop()
         unbindService(connection)
         mBound = false
@@ -101,6 +115,31 @@ class StartActivity : AppCompatActivity() {
         setupButtons()
     }
 
+    fun prepareClickAction(@IdRes viewId: Int, onClick: () -> Unit) {
+        findViewById<View>(viewId).setOnClickListener {
+            onClick()
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    fun setBluetooth(enable: Boolean): Boolean {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        val isEnabled = bluetoothAdapter.isEnabled
+        if (enable && !isEnabled) {
+            return bluetoothAdapter.enable()
+        } else if (!enable && isEnabled) {
+            return bluetoothAdapter.disable()
+        }
+        // No need to change bluetooth state
+        return true
+    }
+
+    fun showLoader(show: Boolean) {
+        Timber.e("Showing loader: -> $show")
+        findViewById<View>(R.id.blockingProgress).visibility = if(show) View.VISIBLE else View.GONE
+
+    }
+
     private fun setupButtons() {
         with(binding.content) {
             startScan.setOnClickListener {
@@ -109,8 +148,12 @@ class StartActivity : AppCompatActivity() {
             stopScan.setOnClickListener {
                 bluetoothService.stopScan()
             }
-            connect.setOnClickListener { }
-            disconnect.setOnClickListener { }
+            connect.setOnClickListener {
+                bluetoothService.connect(null)
+            }
+            disconnect.setOnClickListener {
+                bluetoothService.disconnect()
+            }
         }
     }
 
@@ -123,9 +166,34 @@ class StartActivity : AppCompatActivity() {
 }
 
 data class TestDataContainer(
-
     val testStarted: Boolean = false,
     val createdTimeStamp: Long = System.currentTimeMillis(),
-    val scanStatus: ScanStatus = ScanStatus.Idle
+    val scanStatus: ScanStatus = ScanStatus.Idle,
+) {
+}
 
-    )
+
+class NotThrownException : Throwable("Initial or neutral state, like a boolean false.")
+
+interface TestLoad {
+    val timeStamp: Long
+    val actionSequenceMap: Map<Int, () -> Unit>
+    val actionSequenceKeys: List<Int>
+}
+
+data class TestPartAction(
+    val createdTimeStamp: Long = System.currentTimeMillis(),
+    val position: Int = -1,
+    val multipleTests: Boolean = false,
+    val timeOutMillis: Long = 0,
+    val startAction: () -> Unit = {},
+    val stopAction: () -> Unit = {},
+    val stopBeforeTimeout: Boolean = false,
+) {
+    val hasTimeOut: Boolean = timeOutMillis > 0
+
+}
+
+sealed class TestState {
+
+}

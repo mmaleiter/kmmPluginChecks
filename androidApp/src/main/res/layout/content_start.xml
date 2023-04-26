@@ -45,6 +45,13 @@
             android:layout_margin="8dp"
             android:text="Stop scan" />
 
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/open_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:text="Undefined" />
+
     </androidx.appcompat.widget.LinearLayoutCompat>
 
     <FrameLayout
@@ -52,13 +59,11 @@
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:visibility="visible"
-        app:defaultNavHost="true"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/linearLayoutCompat"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:navGraph="@navigation/nav_graph">
+        app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.progressindicator.CircularProgressIndicator
             android:indeterminate="true"

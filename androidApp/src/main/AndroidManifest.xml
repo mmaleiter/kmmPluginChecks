@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:tools="http://schemas.android.com/tools"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+"/
+<!--    <uses-permission android:name="Manifest.permission.BLUETOOTH"/>-->
+<!--    <uses-permission android:name="Manifest.permission.BLUETOOTH_ADMIN"/>-->
+<!--    <uses-permission android:name="Manifest.permission.BLUETOOTH_CONNECT"/>-->
+<!--    <uses-permission android:name="Manifest.permission.BLUETOOTH_SCAN"/>-->
+<!--    <uses-permission android:name="Manifest.permission.BLUETOOTH_ADVERTISE"/>-->
+<!--    <uses-permission android:name="Manifest.permission.ACCESS_FINE_LOCATION"/>-->
+<!--    <uses-permission android:name="Manifest.permission.ACCESS_COARSE_LOCATION"/>-->
+<!--    <uses-permission android:name="Manifest.permission.ACCESS_LOCATION_EXTRA_COMMANDS"/>-->
 
     <application
         android:name=".KmmCheckApplication"
@@ -7,14 +17,13 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-
-
-
         <activity
             android:name=".kable.check.ui.StartActivity"
             android:exported="true"
             android:label="@string/title_activity_start"
-            android:theme="@style/AppTheme">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

@@ -14,6 +14,7 @@ android {
         targetSdk = 33
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
     testOptions {
         animationsDisabled = true
@@ -88,6 +89,4 @@ dependencies {
     androidTestImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4")
     androidTestImplementation ("io.insert-koin:koin-test-junit4:3.3.2")
 
-//    compileOnly(project(path = ":annotations"))
-//    kapt(project(":processor"))
 }

@@ -4,12 +4,10 @@ import android.bluetooth.BluetoothAdapter
 import android.content.Intent
 import android.os.Binder
 import android.os.IBinder
-import android.util.Log
 import androidx.lifecycle.LifecycleService
 import androidx.lifecycle.lifecycleScope
 import com.check.kmm.pluginchecks.android.kable.check.data.AdvertisementWrapper
 import com.check.kmm.pluginchecks.android.kable.check.data.Device
-import com.check.kmm.pluginchecks.android.kable.check.ui.TestDataContainer
 import com.check.kmm.pluginchecks.android.kable.check.util.cancelChildren
 import com.check.kmm.pluginchecks.android.kable.check.util.childScope
 import com.juul.kable.Advertisement
@@ -17,10 +15,9 @@ import com.juul.kable.Bluetooth
 import com.juul.kable.DiscoveredService
 import com.juul.kable.Scanner
 import com.juul.kable.peripheral
-
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import java.lang.IllegalStateException
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 private val SCAN_DURATION_MILLIS = TimeUnit.SECONDS.toMillis(15)
@@ -44,8 +41,6 @@ class BluetoothLeService : LifecycleService() {
         MutableStateFlow<List<AdvertisementWrapper>>(emptyList())
     val advertisements = _advertisements.asStateFlow()
 
-
-
     private fun isBluetoothEnabled(): Boolean {
         return BluetoothAdapter.getDefaultAdapter().isEnabled
     }
@@ -65,7 +60,7 @@ class BluetoothLeService : LifecycleService() {
 
     private val _bluetoothEnabledJob: Job = _scope.launch {
         _blueKable.availability.collect {
-            Log.e("BluetoothAvailable", "Available: $it")
+            Timber.e("Available: $it")
         }
     }
 
@@ -73,10 +68,12 @@ class BluetoothLeService : LifecycleService() {
         disconnect()
 
         when {
-            _scanStatus.value == ScanStatus.Running -> return
+            _scanStatus.value == ScanStatus.Running ->
+
+                return
 
             !isBluetoothEnabled() -> _scanStatus.value =
-                ScanStatus.Failed(ScanFailure.BluetoothNotEnabled)
+                ScanStatus.Failed(ScanFailure.BluetoothNotEnabled())
             //TODO
 //            !hasLocationAndConnectPermissions -> _scanStatus.value =
 //                ScanStatus.Failed(ScanFailure.PermissionsMissing)
@@ -99,11 +96,11 @@ class BluetoothLeService : LifecycleService() {
                                 _foundDevices[advertisement.address] =
                                     AdvertisementWrapper(advertisement)
                                 _advertisements.value = _foundDevices.values.toList()
-                                Log.e("APP", advertisement.toString())
+                                Timber.e(advertisement.toString())
                             }
                     }
                 }.invokeOnCompletion {
-                    Log.e("APP", "SCAN IS STOPPING")
+                    Timber.e("SCAN IS STOPPING")
                     _scanStatus.value = ScanStatus.Idle
                 }
             }
@@ -135,14 +132,14 @@ class BluetoothLeService : LifecycleService() {
         }
     }
 
-    fun connect(advertisement: Advertisement) {
+    fun connect(advertisement: Advertisement?) {
         stopScan()
         disconnect()
 
         _connectState.value = ConnectState.PeripheralConnecting
 
         _connectScope.launch {
-            val per = _connectScope.peripheral(advertisement)
+            val per = _connectScope.peripheral(advertisement!!)
 
             val bridge = Device(per)
             _activeDevice.value = bridge
@@ -171,7 +168,8 @@ class BluetoothLeService : LifecycleService() {
     }
 
     companion object {
-
+        const val ACTION_START_SCAN = ""
+        const val ACTION_STOP_SCAN = ""
     }
 
 }

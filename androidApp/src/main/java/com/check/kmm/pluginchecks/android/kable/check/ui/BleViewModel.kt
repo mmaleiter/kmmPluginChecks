@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
@@ -40,7 +41,6 @@ class BleViewModel @Inject constructor(): ViewModel() {
 
     private val _scanner = Scanner()
     private val _blueKable = Bluetooth
-
 
     private val _foundDevices = hashMapOf<String, AdvertisementWrapper>()
 
@@ -69,20 +69,15 @@ class BleViewModel @Inject constructor(): ViewModel() {
             is ScanStatus.Running -> stopScan()
             is ScanStatus.Idle -> startScan()
             is ScanStatus.Failed -> {
+
             }
         }
     }
 
     fun startScan() {
         disconnect()
-        when {
-            _scanStatus.value == ScanStatus.Running -> return
-
-//            !isBluetoothEnabled() -> _scanStatus.value =
-//                ScanStatus.Failed(ScanFailure.BluetoothNotEnabled)
-            //TODO
-//            !hasLocationAndConnectPermissions -> _scanStatus.value =
-//                ScanStatus.Failed(ScanFailure.PermissionsMissing)
+        when (_scanStatus.value) {
+            ScanStatus.Running -> return
             else -> {
                 _scanStatus.value = ScanStatus.Running
 
@@ -102,11 +97,11 @@ class BleViewModel @Inject constructor(): ViewModel() {
                                 _foundDevices[advertisement.address] =
                                     AdvertisementWrapper(advertisement)
                                 _advertisements.value = _foundDevices.values.toList()
-                                Log.e("APP", advertisement.toString())
+                                Timber.e(advertisement.toString())
                             }
                     }
                 }.invokeOnCompletion {
-                    Log.e("APP", "SCAN IS STOPPING")
+                    Timber.e("SCAN IS STOPPING")
                     _scanStatus.value = ScanStatus.Idle
                 }
             }
@@ -123,7 +118,7 @@ class BleViewModel @Inject constructor(): ViewModel() {
         _connectScope.cancelChildren()
         _connectState.value = ConnectState.Idle
 
-        // TODO:
+        // TODO
         runBlocking {
             _activeDevice.value?.disconnect()
             _activeDevice.value = null
